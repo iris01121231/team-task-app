@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -74,7 +73,6 @@ export default function TeamTaskApp() {
   const [taskDate, setTaskDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [taskAssignee, setTaskAssignee] = useState("");
   const [taskList, setTaskList] = useState([]);
-  const [filterDate, setFilterDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [viewMode, setViewMode] = useState("today");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -89,7 +87,7 @@ export default function TeamTaskApp() {
       const matchedUser = users.find((u) => u.email === userCredential.user.email);
       if (matchedUser) setUser(matchedUser);
       else setError("使用者未授權");
-    } catch (err) {
+    } catch (_err) {
       setError("登入失敗，請確認帳號密碼");
     }
   };
