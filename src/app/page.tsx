@@ -6,6 +6,15 @@ export type UserInfo = {
   name: string;
 } | null;
 
+export type Task = {
+  id: string;
+  title: string;
+  desc: string;
+  date: string;
+  assignee: string;
+  status: string;
+};
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -145,24 +154,31 @@ export default function TeamTaskApp() {
     await deleteDoc(taskRef);
   };
 
-  const openEditDialog = (task: any) => {
+  const openEditDialog = (task: Task) => {
     setEditingTask(task);
     setEditTitle(task.title);
     setEditDesc(task.desc);
     setEditDialogOpen(true);
   };
-
+  
+  const openReportDialog = (task: Task) => {
+    setReportTask(task);
+    setIsReportDialogOpen(true);
+  };
+  
   const handleSaveEdit = async () => {
     const taskRef = doc(db, "tasks", editingTask.id);
     await updateDoc(taskRef, { title: editTitle, desc: editDesc });
     setEditDialogOpen(false);
   };
 
-  const handleReportTask = async (taskId: string) => {
-    setReportTask(task);
-    setIsReportDialogOpen(true);
-  };
-  
+  const handleReportTask = async () => {
+    if (!reportTask?.id) return;
+    const taskRef = doc(db, "tasks", reportTask.id);
+    await updateDoc(taskRef, { status: reportTask.status });
+    setIsReportDialogOpen(false);
+  }
+
   const handleExportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(taskList);
     const workbook = XLSX.utils.book_new();
