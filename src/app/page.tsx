@@ -1,6 +1,6 @@
 'use client';
 
-type UserInfo = {
+export type UserInfo = {
   email: string;
   role: string;
   name: string;
@@ -91,9 +91,9 @@ export default function TeamTaskApp() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const matchedUser = users.find((u) => u.email === userCredential.user.email);
-      if (matchedUser) setUser(matchedUser);
+      if (matchedUser) setUser(matchedUser); // ✅ TS 現在會接受這個型別
       else setError("使用者未授權");
-    } catch  {
+    } catch {
       setError("登入失敗，請確認帳號密碼");
     }
   };
