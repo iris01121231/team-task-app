@@ -177,7 +177,8 @@ export default function TeamTaskApp() {
     const taskRef = doc(db, "tasks", reportTask.id);
     await updateDoc(taskRef, { status: reportTask.status });
     setIsReportDialogOpen(false);
-  }
+  };
+  
 
   const handleExportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(taskList);
