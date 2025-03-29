@@ -198,7 +198,7 @@ export default function TeamTaskApp() {
     const unsubscribe = onSnapshot(baseQuery, (querySnapshot) => {
       const tasks: Task[] = [];
       querySnapshot.forEach((doc) => {
-        tasks.push({ id: doc.id, ...doc.data() });
+        tasks.push({ id: doc.id, ...doc.data() } as Task); // ✅ 這邊重點加上 as Task
       });
       setTaskList(tasks);
     });
