@@ -94,7 +94,8 @@ export default function TeamTaskApp() {
   const [editTitle, setEditTitle] = useState("");
   const [editDesc, setEditDesc] = useState("");
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
-  const [reportTask, setReportTask] = useState(null);
+  const [reportTask, setReportTask] = useState<Task | null>(null);
+
 
   const handleLogin = async () => {
     try {
