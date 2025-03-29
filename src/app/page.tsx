@@ -90,7 +90,7 @@ export default function TeamTaskApp() {
   const [taskList, setTaskList] = useState([]);
   const [viewMode, setViewMode] = useState("today");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDesc, setEditDesc] = useState("");
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
