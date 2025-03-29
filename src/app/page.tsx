@@ -87,7 +87,7 @@ export default function TeamTaskApp() {
   const [taskDesc, setTaskDesc] = useState("");
   const [taskDate, setTaskDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [taskAssignee, setTaskAssignee] = useState("");
-  const [taskList, setTaskList] = useState([]);
+  const [taskList, setTaskList] = useState<Task[]>([]);
   const [viewMode, setViewMode] = useState("today");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -198,9 +198,9 @@ export default function TeamTaskApp() {
     const unsubscribe = onSnapshot(baseQuery, (querySnapshot) => {
       const tasks: Task[] = [];
       querySnapshot.forEach((doc) => {
-        tasks.push({ id: doc.id, ...doc.data() } as Task); // ✅ 這邊重點加上 as Task
+        tasks.push({ id: doc.id, ...doc.data() } as Task);
       });
-      setTaskList(tasks);
+      setTaskList(tasks); 
     });
 
     return () => unsubscribe();
