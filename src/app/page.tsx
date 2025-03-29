@@ -196,7 +196,7 @@ export default function TeamTaskApp() {
       : query(collection(db, "tasks"), where("assignee", "==", user.name));
 
     const unsubscribe = onSnapshot(baseQuery, (querySnapshot) => {
-      const tasks = [];
+      const tasks: Task[] = [];
       querySnapshot.forEach((doc) => {
         tasks.push({ id: doc.id, ...doc.data() });
       });
