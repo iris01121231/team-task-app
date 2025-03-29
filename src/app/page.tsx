@@ -1,5 +1,11 @@
 'use client';
 
+type UserInfo = {
+  email: string;
+  role: string;
+  name: string;
+} | null;
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -64,7 +70,7 @@ const users = [
 ];
 
 export default function TeamTaskApp() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<UserInfo>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
