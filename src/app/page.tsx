@@ -87,7 +87,7 @@ export default function TeamTaskApp() {
       const matchedUser = users.find((u) => u.email === userCredential.user.email);
       if (matchedUser) setUser(matchedUser);
       else setError("使用者未授權");
-    } catch (_err) {
+    } catch  {
       setError("登入失敗，請確認帳號密碼");
     }
   };
