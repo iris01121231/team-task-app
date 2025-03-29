@@ -147,12 +147,12 @@ export default function TeamTaskApp() {
   };
 
   const handleDelete = async (taskId: string) => {
-    if (user.role !== "leader") return;
+    if (!user || user.role !== "leader") return;
     const confirmDelete = window.confirm("確定要刪除這個任務嗎？");
     if (!confirmDelete) return;
     const taskRef = doc(db, "tasks", taskId);
     await deleteDoc(taskRef);
-  };
+  }; 
 
   const openEditDialog = (task: Task) => {
     setEditingTask(task);
