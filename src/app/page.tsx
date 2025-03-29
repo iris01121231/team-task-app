@@ -168,6 +168,7 @@ export default function TeamTaskApp() {
   };
   
   const handleSaveEdit = async () => {
+    if (!editingTask) return;
     const taskRef = doc(db, "tasks", editingTask.id);
     await updateDoc(taskRef, { title: editTitle, desc: editDesc });
     setEditDialogOpen(false);
