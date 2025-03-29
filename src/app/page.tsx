@@ -70,7 +70,7 @@ const users = [
 ];
 
 export default function TeamTaskApp() {
-  const [user, setUser] = useState<UserInfo>(null);
+  const [user, setUser] = useState<UserInfo>(null); // ✅ 加上 as 斷言會在下方 setUser 時使用 // ✅ 加上型別
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -91,7 +91,7 @@ export default function TeamTaskApp() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const matchedUser = users.find((u) => u.email === userCredential.user.email);
-      if (matchedUser) setUser(matchedUser); // ✅ TS 現在會接受這個型別
+      if (matchedUser) setUser(matchedUser as UserInfo); // ✅ TS 現在會接受這個型別
       else setError("使用者未授權");
     } catch {
       setError("登入失敗，請確認帳號密碼");
