@@ -162,13 +162,7 @@ export default function TeamTaskApp() {
     setReportTask(task);
     setIsReportDialogOpen(true);
   };
-
-  const handleReportTask = async (taskId) => {
-    const taskRef = doc(db, "tasks", taskId);
-    await updateDoc(taskRef, { status: reportTask.status });
-    setIsReportDialogOpen(false);
-  };
-
+  
   const handleExportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(taskList);
     const workbook = XLSX.utils.book_new();
