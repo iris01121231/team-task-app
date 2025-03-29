@@ -130,14 +130,14 @@ export default function TeamTaskApp() {
     setTaskAssignee("");
   };
 
-  const handleComplete = async (taskId) => {
+  const handleComplete = async (taskId: string) => {
     const confirmComplete = window.confirm("確定要標註這個任務為完成嗎？");
     if (!confirmComplete) return;
     const taskRef = doc(db, "tasks", taskId);
     await updateDoc(taskRef, { status: "完成" });
   };
 
-  const handleDelete = async (taskId) => {
+  const handleDelete = async (taskId: string) => {
     if (user.role !== "leader") return;
     const confirmDelete = window.confirm("確定要刪除這個任務嗎？");
     if (!confirmDelete) return;
@@ -145,7 +145,7 @@ export default function TeamTaskApp() {
     await deleteDoc(taskRef);
   };
 
-  const openEditDialog = (task) => {
+  const openEditDialog = (task: any) => {
     setEditingTask(task);
     setEditTitle(task.title);
     setEditDesc(task.desc);
@@ -158,7 +158,7 @@ export default function TeamTaskApp() {
     setEditDialogOpen(false);
   };
 
-  const openReportDialog = (task) => {
+  const handleReportTask = async (taskId: string) => {
     setReportTask(task);
     setIsReportDialogOpen(true);
   };
