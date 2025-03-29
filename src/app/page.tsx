@@ -261,7 +261,7 @@ export default function TeamTaskApp() {
               className="w-full border px-3 py-2 rounded text-sm"
               value={reportTask?.status || "未完成"}
               onChange={(e) =>
-                setReportTask((prev) => ({ ...prev, status: e.target.value }))
+                setReportTask((prev) => prev ? { ...prev, status: e.target.value } : null)
               }
             >
               <option value="未完成">未完成</option>
