@@ -66,9 +66,6 @@ const firebaseConfig = {
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-const router = useRouter();
-const searchParams = useSearchParams();
-const queryView = searchParams?.get('view');
 
 const users = [
   {
@@ -94,6 +91,9 @@ const users = [
 ];
 
 export default function TeamTaskApp() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryView = searchParams?.get('view');
   const [user, setUser] = useState<UserInfo>(null); // ✅ 加上 as 斷言會在下方 setUser 時使用 // ✅ 加上型別
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
