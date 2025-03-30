@@ -225,6 +225,9 @@ export default function TeamTaskApp() {
     ? taskList.filter((t) => t.date === format(new Date(), "yyyy-MM-dd"))
     : taskList;
 
+  const myTasks = user ? filteredTasks.filter((t) => t.assignee === user.name) : [];
+   const otherTasks = user ? filteredTasks.filter((t) => t.assignee !== user.name) : [];
+  
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
@@ -333,15 +336,9 @@ export default function TeamTaskApp() {
           <SheetContent side="left">
             <div className="space-y-2">
               <h2 className="text-lg font-semibold">📋 功能選單</h2>
-              <Button variant="ghost" className="w-full justify-start gap-2" onClick={() => setViewMode("today")}>
-                📅 <CalendarDays className="w-4 h-4" /> 今日任務
-              </Button>
-              <Button variant="ghost" className="w-full justify-start gap-2" onClick={() => setViewMode("all")}>
-                📃 <ListTodo className="w-4 h-4" /> 全部任務
-              </Button>
-              <Button variant="ghost" className="w-full justify-start gap-2" onClick={handleExportExcel}>
-                📤 匯出 Excel
-              </Button>
+              <Button variant="ghost" className="w-full justify-start py-3 text-base border-b border-gray-300" onClick={() => setViewMode("today")}>📅 今日任務</Button>
+              <Button variant="ghost" className="w-full justify-start py-3 text-base border-b border-gray-300" onClick={() => setViewMode("all")}>📃 全部任務</Button>
+              <Button variant="ghost" className="w-full justify-start py-3 text-base border-b border-gray-300" onClick={() => window.location.href = "/history"}>🕓 歷史任務</Button>
             </div>
           </SheetContent>
         </Sheet>
@@ -374,58 +371,62 @@ export default function TeamTaskApp() {
           </Card>
         )}
 
-        <h2 className="text-xl font-bold">
-          {viewMode === "today" ? "📅 今日任務" : "📃 全部任務"}
-        </h2>
+        <h2 className="text-xl font-bold">📅 今日任務</h2>
 
-        {filteredTasks.length === 0 ? (
-          <p className="text-gray-500">目前沒有任務。</p>
-        ) : (
+        {user.role === "member" ? (
+    <>
+      <section>
+        <h3 className="text-lg font-semibold mb-2">🧑 我的任務</h3>
+        {myTasks.length === 0 ? <p>尚無任務</p> : (
           <ul className="space-y-2">
-            {filteredTasks.map((task) => (
+            {myTasks.map((task) => (
               <li key={task.id} className="bg-white p-3 rounded shadow">
                 <div className="font-semibold">{task.title}</div>
                 <div className="text-sm text-gray-600">{task.desc}</div>
-                <div className="text-xs text-gray-400">
-                  📆 {task.date}｜👤 {task.assignee}｜✅ {task.status}
+                <div className="text-xs text-gray-400">📆 {task.date}｜✅ {task.status}</div>
+                <div className="mt-2">
+                  <Button size="sm" onClick={() => openReportDialog(task)}>回報</Button>
                 </div>
-                <div className="flex gap-2 mt-2">
-  {user.role === "leader" ? (
-    <>
-      <Button size="sm" onClick={() => openEditDialog(task)}>編輯</Button>
-
-      <Button
-        size="sm"
-        onClick={() => {
-          setConfirmAction("complete");
-          setTargetTaskId(task.id);
-          setConfirmDialogOpen(true);
-        }}
-      >
-        完成
-      </Button>
-
-      <Button
-        size="sm"
-        onClick={() => {
-          setConfirmAction("delete");
-          setTargetTaskId(task.id);
-          setConfirmDialogOpen(true);
-        }}
-      >
-        刪除
-      </Button>
-    </>
-  ) : (
-    <Button size="sm" onClick={() => openReportDialog(task)}>回報</Button>
-  )}
-</div>
-
               </li>
             ))}
           </ul>
         )}
-      </main>
+      </section>
+
+      <section className="mt-6">
+        <h3 className="text-lg font-semibold mb-2">👥 其他人任務</h3>
+        {otherTasks.length === 0 ? <p>無其他人任務</p> : (
+          <ul className="space-y-2">
+            {otherTasks.map((task) => (
+              <li key={task.id} className="bg-white p-3 rounded shadow">
+                <div className="font-semibold">{task.title}</div>
+                <div className="text-sm text-gray-600">{task.desc}</div>
+                <div className="text-xs text-gray-400">📆 {task.date}｜👤 {task.assignee}｜✅ {task.status}</div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
+  ) : (
+    // Leader 顯示所有任務
+    <ul className="space-y-2">
+      {filteredTasks.map((task) => (
+        <li key={task.id} className="bg-white p-3 rounded shadow">
+          <div className="font-semibold">{task.title}</div>
+          <div className="text-sm text-gray-600">{task.desc}</div>
+          <div className="text-xs text-gray-400">📆 {task.date}｜👤 {task.assignee}｜✅ {task.status}</div>
+          <div className="flex gap-2 mt-2">
+            <Button size="sm" onClick={() => openEditDialog(task)}>編輯</Button>
+            <Button size="sm" onClick={() => { setConfirmAction("complete"); setTargetTaskId(task.id); setConfirmDialogOpen(true); }}>完成</Button>
+            <Button size="sm" onClick={() => { setConfirmAction("delete"); setTargetTaskId(task.id); setConfirmDialogOpen(true); }}>刪除</Button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )}
+</main>
+
     </div>
   );
 }
