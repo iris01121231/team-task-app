@@ -30,7 +30,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, CalendarDays, ListTodo } from "lucide-react";
+import { Menu } from "lucide-react";
 import { format } from "date-fns";
 import * as XLSX from "xlsx";
 import {
@@ -195,13 +195,6 @@ export default function TeamTaskApp() {
       status: reportTask.status || "完成"
     });
     setIsReportDialogOpen(false);
-  };
-
-  const handleExportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(taskList);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Tasks");
-    XLSX.writeFile(workbook, "任務清單.xlsx");
   };
 
   useEffect(() => {
