@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
 import {
   getFirestore,
@@ -13,6 +12,7 @@ import {
   query,
   where,
   onSnapshot,
+  DocumentData,
 } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 
@@ -28,8 +28,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// 定義 Task 型別
+interface Task extends DocumentData {
+  id: string;
+  title: string;
+  desc: string;
+  date: string;
+  assignee: string;
+  status: string;
+}
+
 export default function HistoryPage() {
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
@@ -43,9 +53,9 @@ export default function HistoryPage() {
     );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const list: any[] = [];
+      const list: Task[] = [];
       querySnapshot.forEach((doc) => {
-        list.push({ id: doc.id, ...doc.data() });
+        list.push({ id: doc.id, ...doc.data() } as Task);
       });
       setTasks(list);
     });
