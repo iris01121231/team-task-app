@@ -32,7 +32,6 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { format } from "date-fns";
-import * as XLSX from "xlsx";
 import {
   getFirestore,
   collection,
