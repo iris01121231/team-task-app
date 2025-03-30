@@ -40,7 +40,6 @@ import {
   deleteDoc,
   doc,
   query,
-  where,
   onSnapshot
 } from "firebase/firestore";
 import {
