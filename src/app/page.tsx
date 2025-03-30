@@ -76,6 +76,16 @@ const users = [
     role: "member",
     name: "嵐欽"
   },
+  {
+    email: "member2@example.com",
+    role: "member",
+    name: "建偉"
+  },
+  {
+    email: "member3@example.com",
+    role: "member",
+    name: "岩松"
+  },
 ];
 
 export default function TeamTaskApp() {
