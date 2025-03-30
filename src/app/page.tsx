@@ -269,10 +269,12 @@ export default function TeamTaskApp() {
             </select>
           </div>
           <DialogFooter className="mt-4">
-            <Button onClick={() => handleReportTask(reportTask.id)}>送出</Button>
-            <DialogClose asChild>
-              <Button variant="outline">取消</Button>
-            </DialogClose>
+          <Button onClick={() => reportTask && handleReportTask(reportTask.id)}>
+            送出
+          </Button>
+          <DialogClose asChild>
+            <Button variant="outline">取消</Button>
+          </DialogClose>
           </DialogFooter>
         </DialogContent>
       </Dialog>
