@@ -175,12 +175,13 @@ export default function TeamTaskApp() {
   };
 
   const handleReportTask = async () => {
-    if (!reportTask?.id) return;
+    if (!reportTask) return;
     const taskRef = doc(db, "tasks", reportTask.id);
-    await updateDoc(taskRef, { status: reportTask.status });
+    await updateDoc(taskRef, {
+      status: reportTask.status || "完成"
+    });
     setIsReportDialogOpen(false);
   };
-  
 
   const handleExportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(taskList);
@@ -269,9 +270,7 @@ export default function TeamTaskApp() {
             </select>
           </div>
           <DialogFooter className="mt-4">
-          <Button onClick={() => reportTask && handleReportTask(reportTask.id)}>
-            送出
-          </Button>
+          <Button onClick={handleReportTask}>送出</Button>
           <DialogClose asChild>
             <Button variant="outline">取消</Button>
           </DialogClose>
