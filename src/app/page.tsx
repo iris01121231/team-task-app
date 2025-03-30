@@ -95,6 +95,10 @@ export default function TeamTaskApp() {
   const [editDesc, setEditDesc] = useState("");
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [reportTask, setReportTask] = useState<Task | null>(null);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<"complete" | "delete" | null>(null);
+  const [targetTaskId, setTargetTaskId] = useState<string | null>(null);
+
 
 
   const handleLogin = async () => {
@@ -248,6 +252,36 @@ export default function TeamTaskApp() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>{confirmAction === "complete" ? "確認完成任務" : "確認刪除任務"}</DialogTitle>
+    </DialogHeader>
+    <p className="text-sm text-gray-600">
+      {confirmAction === "complete"
+        ? "確定要將此任務標記為完成嗎？"
+        : "確定要刪除這項任務嗎？此動作無法還原。"}
+    </p>
+    <DialogFooter className="mt-4">
+      <Button
+        onClick={async () => {
+          if (!targetTaskId) return;
+          if (confirmAction === "complete") {
+            await handleComplete(targetTaskId);
+          } else if (confirmAction === "delete") {
+            await handleDelete(targetTaskId);
+          }
+          setConfirmDialogOpen(false);
+        }}
+      >
+        確認
+      </Button>
+      <DialogClose asChild>
+        <Button variant="outline">取消</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
       {/* 回報任務 Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
@@ -345,16 +379,31 @@ export default function TeamTaskApp() {
                   📆 {task.date}｜👤 {task.assignee}｜✅ {task.status}
                 </div>
                 <div className="flex gap-2 mt-2">
-                  {user.role === "leader" && (
-                    <>
-                      <Button size="sm" onClick={() => openEditDialog(task)}>編輯</Button>
-                      <Button size="sm" onClick={() => handleComplete(task.id)}>完成</Button>
-                      <Button size="sm" onClick={() => handleDelete(task.id)}>刪除</Button>
-                    </>
-                  )}
-                  {user.role === "member" && (
-                    <Button size="sm" onClick={() => openReportDialog(task)}>回報</Button>
-                  )}
+                {user.role === "leader" && (
+                <>
+                  <Button size="sm" onClick={() => openEditDialog(task)}>編輯</Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setConfirmAction("complete");
+                      setTargetTaskId(task.id);
+                      setConfirmDialogOpen(true);
+                    }}
+                  >
+                    完成
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setConfirmAction("delete");
+                      setTargetTaskId(task.id);
+                      setConfirmDialogOpen(true);
+                    }}
+                  >
+                    刪除
+                  </Button>
+                </>
+              )}
                 </div>
               </li>
             ))}
