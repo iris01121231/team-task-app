@@ -139,6 +139,14 @@ export default function TeamTaskApp() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (queryView === "all") {
+      setViewMode("all");
+    } else {
+      setViewMode("today");
+    }
+  }, [queryView]);
+  
   const handleLogout = async () => {
     await signOut(auth);
     setUser(null);
