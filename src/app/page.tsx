@@ -285,32 +285,33 @@ export default function TeamTaskApp() {
 
       {/* 回報任務 Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>回報任務狀態</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2">
-            <Label htmlFor="status">狀態</Label>
-            <select
-              id="status"
-              className="w-full border px-3 py-2 rounded text-sm"
-              value={reportTask?.status || "未完成"}
-              onChange={(e) =>
-                setReportTask((prev) => prev ? { ...prev, status: e.target.value } : null)
-              }
-            >
-              <option value="未完成">未完成</option>
-              <option value="完成">完成</option>
-            </select>
-          </div>
-          <DialogFooter className="mt-4">
-          <Button onClick={handleReportTask}>送出</Button>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>任務回報</DialogTitle>
+        </DialogHeader>
+        <div>
+          <Label>狀態</Label>
+          <select
+            value={reportTask?.status || "未完成"}
+            onChange={(e) =>
+              setReportTask((prev) =>
+                prev ? { ...prev, status: e.target.value } : prev
+              )
+            }
+          >
+            <option value="未完成">未完成</option>
+            <option value="完成">完成</option>
+          </select>
+        </div>
+        <DialogFooter className="mt-4">
+        <Button onClick={() => handleReportTask()}>送出</Button>
           <DialogClose asChild>
             <Button variant="outline">取消</Button>
           </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
 
       <header className="flex items-center justify-between bg-white p-4 shadow">
         <Sheet>
@@ -379,32 +380,37 @@ export default function TeamTaskApp() {
                   📆 {task.date}｜👤 {task.assignee}｜✅ {task.status}
                 </div>
                 <div className="flex gap-2 mt-2">
-                {user.role === "leader" && (
-                <>
-                  <Button size="sm" onClick={() => openEditDialog(task)}>編輯</Button>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setConfirmAction("complete");
-                      setTargetTaskId(task.id);
-                      setConfirmDialogOpen(true);
-                    }}
-                  >
-                    完成
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setConfirmAction("delete");
-                      setTargetTaskId(task.id);
-                      setConfirmDialogOpen(true);
-                    }}
-                  >
-                    刪除
-                  </Button>
-                </>
-              )}
-                </div>
+  {user.role === "leader" ? (
+    <>
+      <Button size="sm" onClick={() => openEditDialog(task)}>編輯</Button>
+
+      <Button
+        size="sm"
+        onClick={() => {
+          setConfirmAction("complete");
+          setTargetTaskId(task.id);
+          setConfirmDialogOpen(true);
+        }}
+      >
+        完成
+      </Button>
+
+      <Button
+        size="sm"
+        onClick={() => {
+          setConfirmAction("delete");
+          setTargetTaskId(task.id);
+          setConfirmDialogOpen(true);
+        }}
+      >
+        刪除
+      </Button>
+    </>
+  ) : (
+    <Button size="sm" onClick={() => openReportDialog(task)}>回報</Button>
+  )}
+</div>
+
               </li>
             ))}
           </ul>
