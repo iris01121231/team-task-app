@@ -14,7 +14,7 @@ import {
   onSnapshot,
   DocumentData,
 } from 'firebase/firestore';
-import { initializeApp } from 'firebase/app';
+import { getApp, getApps, initializeApp } from 'firebase/app';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBFmvAHgSJsdULbvdtZPh4XxYJAz1WxGfc',
@@ -25,7 +25,7 @@ const firebaseConfig = {
   appId: '1:535484338940:web:4bbcc51b3a69198ca33d79',
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // 定義 Task 型別
