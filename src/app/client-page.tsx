@@ -215,16 +215,14 @@ export default function TeamTaskApp() {
 
   useEffect(() => {
     if (!user) return;
-    const baseQuery = user.role === "leader"
-      ? query(collection(db, "tasks"))
-      : query(collection(db, "tasks"), where("assignee", "==", user.name));
+    const baseQuery = query(collection(db, "tasks")); // ✅ 不分角色，全撈
 
     const unsubscribe = onSnapshot(baseQuery, (querySnapshot) => {
       const tasks: Task[] = [];
       querySnapshot.forEach((doc) => {
         tasks.push({ id: doc.id, ...doc.data() } as Task);
       });
-      setTaskList(tasks); 
+      setTaskList(tasks);
     });
 
     return () => unsubscribe();
