@@ -114,13 +114,7 @@ export default function TeamTaskApp() {
   const [confirmAction, setConfirmAction] = useState<"complete" | "delete" | null>(null);
   const [targetTaskId, setTargetTaskId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (queryView === 'all') {
-      setViewMode('all');
-    } else {
-      setViewMode('today');
-    }
-  }, [queryView]);
+
 
   const handleLogin = async () => {
     try {
