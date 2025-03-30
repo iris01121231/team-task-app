@@ -50,6 +50,8 @@ import {
   signOut
 } from "firebase/auth";
 import { getApp, getApps, initializeApp } from "firebase/app";
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBFmvAHgSJsdULbvdtZPh4XxYJAz1WxGfc",
@@ -64,6 +66,9 @@ const firebaseConfig = {
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const router = useRouter();
+const searchParams = useSearchParams();
+const queryView = searchParams?.get('view');
 
 const users = [
   {
@@ -331,8 +336,8 @@ export default function TeamTaskApp() {
           <SheetContent side="left">
             <div className="space-y-2">
               <h2 className="text-lg font-semibold">📋 功能選單</h2>
-              <Button variant="ghost" className="w-full justify-start py-3 text-base border-b border-gray-300" onClick={() => setViewMode("today")}>📅 今日任務</Button>
-              <Button variant="ghost" className="w-full justify-start py-3 text-base border-b border-gray-300" onClick={() => setViewMode("all")}>📃 全部任務</Button>
+              <Button onClick={() => router.push('/')}>📅 今日任務</Button>
+              <Button onClick={() => router.push('/?view=all')}>📃 全部任務</Button>
               <Button variant="ghost" className="w-full justify-start py-3 text-base border-b border-gray-300" onClick={() => window.location.href = "/history"}>🕓 歷史任務</Button>
             </div>
           </SheetContent>
