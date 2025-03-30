@@ -52,6 +52,8 @@ import {
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import { usePathname } from "next/navigation";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyBFmvAHgSJsdULbvdtZPh4XxYJAz1WxGfc",
@@ -112,6 +114,8 @@ export default function TeamTaskApp() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"complete" | "delete" | null>(null);
   const [targetTaskId, setTargetTaskId] = useState<string | null>(null);
+  const view = searchParams?.get("view") || "today";
+  const pathname = usePathname();
 
 
 
@@ -342,10 +346,28 @@ export default function TeamTaskApp() {
           </SheetTrigger>
           <SheetContent side="left">
             <div className="space-y-2">
-              <h2 className="text-lg font-semibold">📋 功能選單</h2>
-              <Button onClick={() => router.push('/')}>📅 今日任務</Button>
-              <Button onClick={() => router.push('/?view=all')}>📃 全部任務</Button>
-              <Button variant="ghost" className="w-full justify-start py-3 text-base border-b border-gray-300" onClick={() => window.location.href = "/history"}>🕓 歷史任務</Button>
+            <h2 className="text-lg font-semibold">📋 功能選單</h2>
+        <Button
+          variant={view === "today" && pathname === "/" ? "secondary" : "ghost"}
+          className="w-full justify-start py-3 text-base border-b border-gray-300"
+          onClick={() => router.push("/")}
+        >
+          📅 今日任務
+        </Button>
+        <Button
+          variant={view === "all" ? "secondary" : "ghost"}
+          className="w-full justify-start py-3 text-base border-b border-gray-300"
+          onClick={() => router.push("/?view=all")}
+        >
+          📃 全部任務
+        </Button>
+        <Button
+          variant={pathname === "/history" ? "secondary" : "ghost"}
+          className="w-full justify-start py-3 text-base border-b border-gray-300"
+          onClick={() => router.push("/history")}
+        >
+          🕓 歷史任務
+        </Button>
             </div>
           </SheetContent>
         </Sheet>
