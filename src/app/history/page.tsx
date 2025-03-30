@@ -15,7 +15,7 @@ import {
   DocumentData,
 } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, signOut } from 'firebase/auth';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
 
@@ -48,10 +48,13 @@ export default function HistoryPage() {
   const [userName, setUserName] = useState<string>('');
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) setUserName(user.displayName || user.email || '使用者');
-    });
-    return () => unsubscribeAuth();
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        setUserName(parsed.name || '使用者');
+      } catch {}
+    }
   }, []);
 
   useEffect(() => {
@@ -80,6 +83,7 @@ export default function HistoryPage() {
 
   const handleLogout = async () => {
     await signOut(auth);
+    localStorage.removeItem('user');
     window.location.href = '/';
   };
 
@@ -95,7 +99,8 @@ export default function HistoryPage() {
           <SheetContent side="left">
             <div className="space-y-2">
               <h2 className="text-lg font-semibold">📋 功能選單</h2>
-              <Button variant="ghost" className="w-full justify-start py-3 text-base border-b border-gray-300" onClick={() => (window.location.href = '/')}>🏠 首頁</Button>
+              <Button variant="ghost" className="w-full justify-start py-3 text-base border-b border-gray-300" onClick={() => (window.location.href = '/')}>📅 今日任務</Button>
+              <Button variant="ghost" className="w-full justify-start py-3 text-base border-b border-gray-300" onClick={() => (window.location.href = '/?view=all')}>📃 所有任務</Button>
               <Button variant="ghost" className="w-full justify-start py-3 text-base border-b border-gray-300" onClick={() => (window.location.href = '/history')}>🕓 歷史任務</Button>
             </div>
           </SheetContent>

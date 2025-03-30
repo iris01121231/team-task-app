@@ -214,9 +214,11 @@ export default function TeamTaskApp() {
     return () => unsubscribe();
   }, [user]);
 
-  const filteredTasks = viewMode === "today"
-    ? taskList.filter((t) => t.date === format(new Date(), "yyyy-MM-dd"))
-    : taskList;
+  const filteredTasks = taskList.filter((t) =>
+    viewMode === "today"
+      ? t.date === format(new Date(), "yyyy-MM-dd")
+      : true
+  );
 
   const myTasks = user ? filteredTasks.filter((t) => t.assignee === user.name) : [];
    const otherTasks = user ? filteredTasks.filter((t) => t.assignee !== user.name) : [];
