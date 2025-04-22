@@ -1,5 +1,26 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { format } from "date-fns";
+import AV from "leancloud-storage";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+  DialogFooter, DialogClose,
+} from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+
+AV.init({
+  appId: "g4MBx9eKQyOVniDh4EobbFL8-MdYXbMMI",
+  appKey: "fmBl5NUElIYgzAqIJzM3PC89",
+});
+
 export type UserInfo = {
   email: string;
   role: string;
@@ -13,88 +34,23 @@ export type Task = {
   date: string;
   assignee: string;
   status: string;
+  reportNote?: string;
 };
-
-import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
-import { format } from "date-fns";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  query,
-  onSnapshot
-} from "firebase/firestore";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "firebase/auth";
-import { getApp, getApps, initializeApp } from "firebase/app";
-import { useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
-import { usePathname } from "next/navigation";
-
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBFmvAHgSJsdULbvdtZPh4XxYJAz1WxGfc",
-  authDomain: "team-task-system.firebaseapp.com",
-  projectId: "team-task-system",
-  storageBucket: "team-task-system.appspot.com",
-  messagingSenderId: "535484338940",
-  appId: "1:535484338940:web:4bbcc51b3a69198ca33d79",
-};
-
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
 
 const users = [
-  {
-    email: "leader@example.com",
-    role: "leader",
-    name: "老蔣",
-  },
-  {
-    email: "member@example.com",
-    role: "member",
-    name: "嵐欽"
-  },
-  {
-    email: "member2@example.com",
-    role: "member",
-    name: "建偉"
-  },
-  {
-    email: "member3@example.com",
-    role: "member",
-    name: "岩松"
-  },
+  { email: "leader@example.com", role: "leader", name: "老蔣" },
+  { email: "member@example.com", role: "member", name: "嵐欽" },
+  { email: "member2@example.com", role: "member", name: "建偉" },
+  { email: "member3@example.com", role: "member", name: "岩松" },
 ];
 
 export default function TeamTaskApp() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const queryView = searchParams?.get('view');
-  const [user, setUser] = useState<UserInfo>(null); // ✅ 加上 as 斷言會在下方 setUser 時使用 // ✅ 加上型別
+  const pathname = usePathname();
+  const queryView = searchParams?.get("view") || "today";
+
+  const [user, setUser] = useState<UserInfo>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -110,132 +66,112 @@ export default function TeamTaskApp() {
   const [editDesc, setEditDesc] = useState("");
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [reportTask, setReportTask] = useState<Task | null>(null);
+  const [reportNote, setReportNote] = useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"complete" | "delete" | null>(null);
   const [targetTaskId, setTargetTaskId] = useState<string | null>(null);
-  const view = searchParams?.get("view") || "today";
-  const pathname = usePathname();
 
-
-
-  const handleLogin = async () => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const matchedUser = users.find((u) => u.email === userCredential.user.email);
-      if (matchedUser) setUser(matchedUser as UserInfo); // ✅ TS 現在會接受這個型別
-      else setError("使用者未授權");
-    } catch {
-      setError("登入失敗，請確認帳號密碼");
-    }
+  const handleLogin = () => {
+    const matchedUser = users.find((u) => u.email === email);
+    if (matchedUser) setUser(matchedUser);
+    else setError("帳號不存在");
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        const matchedUser = users.find((u) => u.email === firebaseUser.email);
-        if (matchedUser) setUser(matchedUser);
-      } else {
-        setUser(null);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (queryView === "all") {
-      setViewMode("all");
-    } else {
-      setViewMode("today");
-    }
-  }, [queryView]);
-  
-  const handleLogout = async () => {
-    await signOut(auth);
-    setUser(null);
-  };
+  const handleLogout = () => setUser(null);
 
   const handleAddTask = async () => {
     if (!taskTitle || !taskAssignee) return;
-    const newTask = {
-      title: taskTitle,
-      desc: taskDesc,
-      date: taskDate,
-      assignee: taskAssignee,
-      status: "未完成",
-    };
-    await addDoc(collection(db, "tasks"), newTask);
-    setTaskTitle("");
-    setTaskDesc("");
-    setTaskAssignee("");
+    const Task = AV.Object.extend("Task");
+    const task = new Task();
+    task.set("title", taskTitle);
+    task.set("desc", taskDesc);
+    task.set("date", taskDate);
+    task.set("assignee", taskAssignee);
+    task.set("status", "未完成");
+    await task.save();
+    setTaskTitle(""); setTaskDesc(""); setTaskAssignee("");
+    fetchTasks();
   };
 
   const handleComplete = async (taskId: string) => {
     const confirmComplete = window.confirm("確定要標註這個任務為完成嗎？");
     if (!confirmComplete) return;
-    const taskRef = doc(db, "tasks", taskId);
-    await updateDoc(taskRef, { status: "完成" });
+    const task = AV.Object.createWithoutData("Task", taskId);
+    task.set("status", "完成");
+    await task.save();
+    fetchTasks();
   };
 
   const handleDelete = async (taskId: string) => {
     if (!user || user.role !== "leader") return;
     const confirmDelete = window.confirm("確定要刪除這個任務嗎？");
     if (!confirmDelete) return;
-    const taskRef = doc(db, "tasks", taskId);
-    await deleteDoc(taskRef);
-  }; 
+    const task = AV.Object.createWithoutData("Task", taskId);
+    await task.destroy();
+    fetchTasks();
+  };
 
+  const handleSaveEdit = async () => {
+    if (!editingTask) return;
+    const task = AV.Object.createWithoutData("Task", editingTask.id);
+    task.set("title", editTitle);
+    task.set("desc", editDesc);
+    await task.save();
+    setEditDialogOpen(false);
+    fetchTasks();
+  };
+
+  const handleReportTask = async () => {
+    if (!reportTask) return;
+    const task = AV.Object.createWithoutData("Task", reportTask.id);
+    task.set("status", reportTask.status || "完成");
+    task.set("reportNote", reportNote || "");
+    await task.save();
+    setIsReportDialogOpen(false);
+    setReportNote("");
+    fetchTasks();
+  };
   const openEditDialog = (task: Task) => {
     setEditingTask(task);
     setEditTitle(task.title);
     setEditDesc(task.desc);
     setEditDialogOpen(true);
   };
-  
   const openReportDialog = (task: Task) => {
     setReportTask(task);
     setIsReportDialogOpen(true);
   };
   
-  const handleSaveEdit = async () => {
-    if (!editingTask) return;
-    const taskRef = doc(db, "tasks", editingTask.id);
-    await updateDoc(taskRef, { title: editTitle, desc: editDesc });
-    setEditDialogOpen(false);
-  };
-
-  const handleReportTask = async () => {
-    if (!reportTask) return;
-    const taskRef = doc(db, "tasks", reportTask.id);
-    await updateDoc(taskRef, {
-      status: reportTask.status || "完成"
-    });
-    setIsReportDialogOpen(false);
+  const fetchTasks = async () => {
+    const query = new AV.Query("Task");
+    const results = await query.find();
+    const tasks = results.map((item) => ({
+      id: item.id as string,
+      title: item.get("title"),
+      desc: item.get("desc"),
+      date: item.get("date"),
+      assignee: item.get("assignee"),
+      status: item.get("status"),
+      reportNote: item.get("reportNote") || "",
+    }));
+    setTaskList(tasks);
   };
 
   useEffect(() => {
-    if (!user) return;
-    const baseQuery = query(collection(db, "tasks")); // ✅ 不分角色，全撈
+    if (queryView === "all") setViewMode("all");
+    else setViewMode("today");
+  }, [queryView]);
 
-    const unsubscribe = onSnapshot(baseQuery, (querySnapshot) => {
-      const tasks: Task[] = [];
-      querySnapshot.forEach((doc) => {
-        tasks.push({ id: doc.id, ...doc.data() } as Task);
-      });
-      setTaskList(tasks);
-    });
-
-    return () => unsubscribe();
+  useEffect(() => {
+    if (user) fetchTasks();
   }, [user]);
 
   const filteredTasks = taskList.filter((t) =>
-    viewMode === "today"
-      ? t.date === format(new Date(), "yyyy-MM-dd")
-      : true
+    viewMode === "today" ? t.date === format(new Date(), "yyyy-MM-dd") : true
   );
 
   const myTasks = user ? filteredTasks.filter((t) => t.assignee === user.name) : [];
-   const otherTasks = user ? filteredTasks.filter((t) => t.assignee !== user.name) : [];
-  
+  const otherTasks = user ? filteredTasks.filter((t) => t.assignee !== user.name) : [];
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
@@ -306,32 +242,48 @@ export default function TeamTaskApp() {
 
       {/* 回報任務 Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>任務回報</DialogTitle>
-        </DialogHeader>
-        <div>
-          <Label>狀態</Label>
-          <select
-            value={reportTask?.status || "未完成"}
-            onChange={(e) =>
-              setReportTask((prev) =>
-                prev ? { ...prev, status: e.target.value } : prev
-              )
-            }
-          >
-            <option value="未完成">未完成</option>
-            <option value="完成">完成</option>
-          </select>
-        </div>
-        <DialogFooter className="mt-4">
-        <Button onClick={() => handleReportTask()}>送出</Button>
-          <DialogClose asChild>
-            <Button variant="outline">取消</Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>任務回報</DialogTitle>
+    </DialogHeader>
+    
+    <div className="space-y-2">
+      <div>
+        <Label>狀態</Label>
+        <select
+          value={reportTask?.status || "未完成"}
+          onChange={(e) =>
+            setReportTask((prev) =>
+              prev ? { ...prev, status: e.target.value } : prev
+            )
+          }
+          className="w-full border px-3 py-2 rounded text-sm"
+        >
+          <option value="未完成">未完成</option>
+          <option value="完成">完成</option>
+        </select>
+      </div>
+
+      <div>
+        <Label htmlFor="report-note">補充說明</Label>
+        <Textarea
+          id="report-note"
+          placeholder="可補充說明任務內容、遇到的問題或其他回報事項"
+          value={reportNote}
+          onChange={(e) => setReportNote(e.target.value)}
+        />
+      </div>
+    </div>
+
+    <DialogFooter className="mt-4">
+      <Button onClick={handleReportTask}>送出</Button>
+      <DialogClose asChild>
+        <Button variant="outline">取消</Button>
+      </DialogClose>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
 
 
       <header className="flex items-center justify-between bg-white p-4 shadow">
@@ -345,14 +297,14 @@ export default function TeamTaskApp() {
             <div className="space-y-2">
             <h2 className="text-lg font-semibold">📋 功能選單</h2>
         <Button
-          variant={view === "today" && pathname === "/" ? "secondary" : "ghost"}
+          variant={viewMode === "today" && pathname === "/" ? "secondary" : "ghost"}
           className="w-full justify-start py-3 text-base border-b border-gray-300"
           onClick={() => router.push("/")}
         >
           📅 今日任務
         </Button>
         <Button
-          variant={view === "all" ? "secondary" : "ghost"}
+          variant={viewMode === "all" ? "secondary" : "ghost"}
           className="w-full justify-start py-3 text-base border-b border-gray-300"
           onClick={() => router.push("/?view=all")}
         >
@@ -437,19 +389,51 @@ export default function TeamTaskApp() {
   ) : (
     // Leader 顯示所有任務
     <ul className="space-y-2">
-      {filteredTasks.map((task) => (
-        <li key={task.id} className="bg-white p-3 rounded shadow">
-          <div className="font-semibold">{task.title}</div>
-          <div className="text-sm text-gray-600">{task.desc}</div>
-          <div className="text-xs text-gray-400">📆 {task.date}｜👤 {task.assignee}｜✅ {task.status}</div>
-          <div className="flex gap-2 mt-2">
-            <Button size="sm" onClick={() => openEditDialog(task)}>編輯</Button>
-            <Button size="sm" onClick={() => { setConfirmAction("complete"); setTargetTaskId(task.id); setConfirmDialogOpen(true); }}>完成</Button>
-            <Button size="sm" onClick={() => { setConfirmAction("delete"); setTargetTaskId(task.id); setConfirmDialogOpen(true); }}>刪除</Button>
-          </div>
-        </li>
-      ))}
-    </ul>
+  {filteredTasks.map((task) => (
+    <li key={task.id} className="bg-white p-3 rounded shadow">
+      <div className="font-semibold">{task.title}</div>
+      <div className="text-sm text-gray-600">{task.desc}</div>
+      <div className="text-xs text-gray-400">
+        📆 {task.date}｜👤 {task.assignee}｜✅ {task.status}
+      </div>
+
+      {task.reportNote && (
+  <div className="text-sm text-blue-700 mt-1">💬 補充：{task.reportNote}</div>
+)}
+
+      {task.reportNote && (
+        <div className="text-sm text-blue-700 mt-1">
+          💬 補充：{task.reportNote}
+        </div>
+      )}
+
+      <div className="flex gap-2 mt-2">
+        <Button size="sm" onClick={() => openEditDialog(task)}>編輯</Button>
+        <Button
+          size="sm"
+          onClick={() => {
+            setConfirmAction("complete");
+            setTargetTaskId(task.id);
+            setConfirmDialogOpen(true);
+          }}
+        >
+          完成
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => {
+            setConfirmAction("delete");
+            setTargetTaskId(task.id);
+            setConfirmDialogOpen(true);
+          }}
+        >
+          刪除
+        </Button>
+      </div>
+    </li>
+  ))}
+</ul>
+
   )}
 </main>
 
