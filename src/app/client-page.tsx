@@ -88,6 +88,7 @@ export default function TeamTaskApp() {
     task.set("date", taskDate);
     task.set("assignee", taskAssignee);
     task.set("status", "未完成");
+    task.setACL(new AV.ACL());
     await task.save();
     setTaskTitle(""); setTaskDesc(""); setTaskAssignee("");
     fetchTasks();
@@ -396,11 +397,6 @@ export default function TeamTaskApp() {
       <div className="text-xs text-gray-400">
         📆 {task.date}｜👤 {task.assignee}｜✅ {task.status}
       </div>
-
-      {task.reportNote && (
-  <div className="text-sm text-blue-700 mt-1">💬 補充：{task.reportNote}</div>
-)}
-
       {task.reportNote && (
         <div className="text-sm text-blue-700 mt-1">
           💬 補充：{task.reportNote}
